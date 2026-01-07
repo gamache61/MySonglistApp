@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySonglistApp</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ff8c00">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/192/ff8c00/ffffff?text=Music">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #fffaf0;
+            display: flex;
+            justify-content: center;
+            padding: 10px;
+            color: #333;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 1200px;
+            margin-top: 20px;
+        }
+        h1 {
+            color: #ff8c00;
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 2.3rem;
+            border-bottom: 2px solid #ff8c00;
+            padding-bottom: 10px;
+        }
+        .input-section {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            border: 1px solid #ffe0b2;
+        }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-width: 150px;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 8px;
+            min-width: 100px;
+            padding-bottom: 12px;
+        }
+        label {
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #e65100;
+        }
+        input[type="text"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #ffcc80;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        input[type="checkbox"] {
+            transform: scale(1.5);
+            cursor: pointer;
+        }
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .add-btn {
+            background-color: #ff8c00;
+            color: white;
+            flex: 2;
+        }
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+            flex: 1;
+        }
+        .load-btn {
+            background-color: #607D8B;
+            color: white;
+            flex: 1;
+        }
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #ffe0b2;
+        }
+        th { background-color: #ff8c00; color: white; text-transform: uppercase; font-size: 0.8rem; }
+        .action-btns { display: flex; gap: 5px; }
+        .delete-btn { background-color: #ff4444; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .edit-btn { background-color: #2196F3; color: white; border: none; padding: 8px; border-radius: 4px; cursor: pointer; }
+        .copyright-mark { color: green; font-weight: bold; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Boots R Country</h1>
+
+    <div class="input-section">
+        <input type="hidden" id="editId">
+        <div class="input-group">
+            <label for="songDate">Date:</label>
+            <input type="date" id="songDate">
+        </div>
+        <div class="input-group">
+            <label for="songTitle">Song Title:</label>
+            <input type="text" id="songTitle" placeholder="Song name">
+        </div>
+        <div class="input-group">
+            <label for="companyName">Company (Creator):</label>
+            <input type="text" id="companyName" placeholder="Who helped">
+        </div>
+        <div class="input-group">
+            <label for="listedOn">Listed On:</label>
+            <input type="text" id="listedOn" placeholder="Spotify, Apple, etc.">
+        </div>
+        <div class="input-group">
+            <label for="isrc">ISRC:</label>
+            <input type="text" id="isrc" placeholder="ISRC code">
+        </div>
+        <div class="input-group">
+            <label for="genre">Genre:</label>
+            <input type="text" id="genre" placeholder="Genre">
+        </div>
+        <div class="input-group">
+            <label for="mood">Mood:</label>
+            <input type="text" id="mood" placeholder="Mood">
+        </div>
+        <div class="checkbox-group">
+            <input type="checkbox" id="copyrighted">
+            <label for="copyrighted">Copyright</label>
+        </div>
+        <div class="btn-container">
+            <button type="button" class="add-btn" id="submitBtn" onclick="addOrUpdateSong()">Add Song</button>
+            <button type="button" class="save-btn" onclick="saveToFile()">Save to File</button>
+            <button type="button" class="load-btn" onclick="document.getElementById('fileInput').click()">Load from File</button>
+            <input type="file" id="fileInput" style="display:none" accept=".json" onchange="loadFromFile(event)">
+        </div>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="songTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Song Title</th>
+                    <th>Company</th>
+                    <th>Listed On</th>
+                    <th>ISRC</th>
+                    <th>Genre</th>
+                    <th>Mood</th>
+                    <th>©</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.getElementById('songDate').valueAsDate = new Date();
+
+    window.onload = () => {
+        loadSongs();
+    };
+
+    function loadSongs() {
+        const tbody = document.querySelector('#songTable tbody');
+        tbody.innerHTML = '';
+        const savedData = JSON.parse(localStorage.getItem('mySongs') || '[]');
+        savedData.forEach(song => renderRow(song));
+    }
+
+    function addOrUpdateSong() {
+        const editId = document.getElementById('editId').value;
+        const songDate = document.getElementById('songDate').value;
+        const songTitle = document.getElementById('songTitle').value;
+        const companyName = document.getElementById('companyName').value;
+        const listedOn = document.getElementById('listedOn').value;
+        const isrc = document.getElementById('isrc').value;
+        const genre = document.getElementById('genre').value;
+        const mood = document.getElementById('mood').value;
+        const copyrighted = document.getElementById('copyrighted').checked;
+
+        if (!songDate || !songTitle || !companyName || !listedOn) {
+            alert("Please fill the main boxes!");
+            return;
+        }
+
+        let data = JSON.parse(localStorage.getItem('mySongs') || '[]');
+
+        if (editId) {
+            data = data.map(s => s.id == editId ? { 
+                ...s, date: songDate, title: songTitle, company: companyName, listed: listedOn, 
+                isrc: isrc, genre: genre, mood: mood, copy: copyrighted 
+            } : s);
+            document.getElementById('editId').value = '';
+            document.getElementById('submitBtn').innerText = 'Add Song';
+        } else {
+            const newSong = { 
+                id: Date.now(), date: songDate, title: songTitle, company: companyName, listed: listedOn, 
+                isrc: isrc, genre: genre, mood: mood, copy: copyrighted 
+            };
+            data.push(newSong);
+        }
+
+        localStorage.setItem('mySongs', JSON.stringify(data));
+        resetForm();
+        loadSongs();
+    }
+
+    function resetForm() {
+        document.getElementById('songTitle').value = '';
+        document.getElementById('companyName').value = '';
+        document.getElementById('listedOn').value = '';
+        document.getElementById('isrc').value = '';
+        document.getElementById('genre').value = '';
+        document.getElementById('mood').value = '';
+        document.getElementById('copyrighted').checked = false;
+        document.getElementById('songDate').valueAsDate = new Date();
+        document.getElementById('editId').value = '';
+        document.getElementById('submitBtn').innerText = 'Add Song';
+    }
+
+    function renderRow(song) {
+        const table = document.getElementById('songTable').getElementsByTagName('tbody')[0];
+        const newRow = table.insertRow();
+        newRow.innerHTML = `
+            <td>${song.date}</td>
+            <td>${song.title}</td>
+            <td>${song.company}</td>
+            <td>${song.listed}</td>
+            <td>${song.isrc || ''}</td>
+            <td>${song.genre || ''}</td>
+            <td>${song.mood || ''}</td>
+            <td style="text-align:center">${song.copy ? '<span class="copyright-mark">✓</span>' : ''}</td>
+            <td class="action-btns">
+                <button class="edit-btn" onclick="editSong(${song.id})">Edit</button>
+                <button class="delete-btn" onclick="deleteSong(${song.id})">X</button>
+            </td>
+        `;
+    }
+
+    function editSong(id) {
+        const data = JSON.parse(localStorage.getItem('mySongs') || '[]');
+        const song = data.find(s => s.id == id);
+        
+        if (song) {
+            document.getElementById('editId').value = song.id;
+            document.getElementById('songDate').value = song.date;
+            document.getElementById('songTitle').value = song.title;
+            document.getElementById('companyName').value = song.company;
+            document.getElementById('listedOn').value = song.listed;
+            document.getElementById('isrc').value = song.isrc || '';
+            document.getElementById('genre').value = song.genre || '';
+            document.getElementById('mood').value = song.mood || '';
+            document.getElementById('copyrighted').checked = song.copy;
+            document.getElementById('submitBtn').innerText = 'Update Song';
+            window.scrollTo(0, 0);
+        }
+    }
+
+    function deleteSong(id) {
+        if(confirm("Delete this song?")) {
+            let data = JSON.parse(localStorage.getItem('mySongs') || '[]');
+            data = data.filter(s => s.id !== id);
+            localStorage.setItem('mySongs', JSON.stringify(data));
+            loadSongs();
+        }
+    }
+
+    // --- NEW SAVE/LOAD FUNCTIONS ---
+
+    function saveToFile() {
+        const data = localStorage.getItem('mySongs') || '[]';
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'my_songlist.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function loadFromFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (Array.isArray(importedData)) {
+                    if (confirm("This will overwrite your current list. Continue?")) {
+                        localStorage.setItem('mySongs', JSON.stringify(importedData));
+                        loadSongs();
+                    }
+                } else {
+                    alert("Invalid file format.");
+                }
+            } catch (err) {
+                alert("Error reading file.");
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
+
+</body>
+</html>
