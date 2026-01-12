@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mypaychequeapp-v3'; 
+const CACHE_NAME = 'MySonglistApp-v3'; 
 const assets = [
   '/',
   '/index.html',
@@ -32,4 +32,5 @@ self.addEventListener('fetch', event => {
       return response || fetch(event.request);
     })
   );
+
 });
